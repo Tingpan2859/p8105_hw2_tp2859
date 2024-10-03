@@ -19,13 +19,11 @@ transit_clean <- transit_data %>%
          Entrance.Type, Entry, Vending, ADA)
 transit_clean <- transit_clean %>%
   mutate(Entry = ifelse(Entry == "YES", TRUE, FALSE))
-
-head(transit_clean)
 ```
 #Describe the dataset
 The dataset contains information about the entrances and exits of subway stations in New York City. Key variables include: line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance. I used read.csv to read the file. Then I selected the varibale that should be retained to get a new table named transit_clean. Next, by using mutate function and ifelse, I convert the entry variable from character to a logical variable.
 
-dimension (rows: 1868 x columns: 19)
+The resulting data set has `r dim(transit_clean)[1]` rows and `r dim(transit_clean)[2]` columns.
 
 The dataset which named transit_clean is not tidy because the subway routes are spread across multiple columns.
 
@@ -35,9 +33,10 @@ The dataset which named transit_clean is not tidy because the subway routes are 
 distinct_stations <- transit_clean %>%
   distinct(Line, Station.Name) %>%
   nrow()
-
-distinct_stations
 ```
+There are `r distinct_stations` distinct stations.
+
+
 
 ##b. How many stations are ADA-compliant?
 ```{r}
@@ -45,9 +44,8 @@ ada_compliant <- transit_clean %>%
   filter(ADA == TRUE) %>%
   distinct(Line, Station.Name) %>%
   nrow()
-
-ada_compliant
 ```
+There are `r ada_compliant` stations that are ADA compliant.
 
 ##c.What proportion of station entrances / exits without vending allow entrance?
 ```{r}
@@ -58,8 +56,9 @@ total_withoutvending <- transit_clean %>%
   filter(Vending == "NO") %>%
   nrow()
 proportion_withoutvending <-entry_withoutvending/total_withoutvending
-proportion_withoutvending
 ```
+There are `r proportion_withoutvending` proportion of station entrances / exits without vending allow entrance.
+
 ##reformat
 ```{r}
 transit_clean <- transit_clean %>%
@@ -73,17 +72,14 @@ The_A_train_stations <- transit_clean_re %>%
   filter(Route == "A") %>%
   distinct(Line, Station.Name) %>%
   nrow()
-The_A_train_stations
-
 
 add_compliant_A <- transit_clean_re %>%
   filter(Route == "A",ADA == "TRUE") %>%
   distinct(Line, Station.Name) %>%
   nrow()
 
-add_compliant_A
-cat('There are',The_A_train_stations, 'distinct stations serve the A train. Of the stations that serve the A train, there are', add_compliant_A, 'ADA compliant.')
 ```
+There are `r The_A_train_stations` distinct stations serve the A train. Of the stations that serve the A train, there are `r add_compliant_A` ADA compliant.
 
 #Problem2
 ```{r}
@@ -158,6 +154,8 @@ gwynnda_june_2022 <- combined_trash_wheel_data %>%
 cat("Total weight of trash collected by Professor Trash Wheel: ", total_weight_prof_trash, " tons\n")
 cat("Total number of cigarette butts collected by Gwynnda in June 2022: ", gwynnda_june_2022, "\n")
 ```
+Total weight of trash collected by Professor Trash Wheel: `r total_weight_prof_trash`. Total number of cigarette butts collected by Gwynnda in June 2022: `r gwynnda_june_2022`.
+
 #data set
 The combined_trash_wheel_data dataset is a comprehensive datasets from Mr. Garbage Truck, Professor Garbage Truck, and Gwynnda Garbage Truck provide a comprehensive view of the garbage collection efforts of these facilities. The dataset contains key variables such as garbage can number, month and year of collection, total weight of waste collected in tons, volume in cubic yards, and counts of various types of waste such as plastic bottles, polystyrene, cigarette butts, glass bottles, plastic bags, wrapping paper, and sports balls.
 
@@ -227,10 +225,7 @@ avg_viewership_s5 <- viewers_tidy %>%
   filter(Series == 5) %>%
   summarize(avg_viewership = mean(Viewership,na.rm = TRUE))
 head(viewers_tidy,10)
-cat("The average viewership in Season 1:",avg_viewership_s1$avg_viewership,"\n")
-cat("The average viewership in Season 5:",avg_viewership_s5$avg_viewership,"\n")
-
 
 ```
-
+The average viewership in Season 1 is `r avg_viewership_s1`. In Season 5, the average viewership is `r avg_viewership_s5`.
 
