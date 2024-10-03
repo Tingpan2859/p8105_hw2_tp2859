@@ -1,8 +1,12 @@
 ---
 title: "P8105_hw2_tp2859"
-output: html_document
+output: github_document
+author: Tingcheng Pan
 date: "2024-10-01"
 ---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 ```{r}
 library(tidyverse)
@@ -15,9 +19,15 @@ transit_clean <- transit_data %>%
          Entrance.Type, Entry, Vending, ADA)
 transit_clean <- transit_clean %>%
   mutate(Entry = ifelse(Entry == "YES", TRUE, FALSE))
+
+head(transit_clean)
 ```
+#Describe the dataset
+The dataset contains information about the entrances and exits of subway stations in New York City. Key variables include: line, station, name, station latitude / longitude, routes served, entry, vending, entrance type, and ADA compliance. I used read.csv to read the file. Then I selected the varibale that should be retained to get a new table named transit_clean. Next, by using mutate function and ifelse, I convert the entry variable from character to a logical variable.
 
+dimension (rows: 1868 x columns: 19)
 
+The dataset which named transit_clean is not tidy because the subway routes are spread across multiple columns.
 
 
 ##a. How many distinct stations are there? 
@@ -32,16 +42,7 @@ distinct_stations
 ##b. How many stations are ADA-compliant?
 ```{r}
 ada_compliant <- transit_clean %>%
-  filter(ADA == "TRUE") %>%
-  distinct(Line, Station.Name) %>%
-  nrow()
-
-ada_compliant
-```
-##b. How many stations are ADA-compliant?
-```{r}
-ada_compliant <- transit_clean %>%
-  filter(ADA == "TRUE") %>%
+  filter(ADA == TRUE) %>%
   distinct(Line, Station.Name) %>%
   nrow()
 
@@ -72,6 +73,8 @@ The_A_train_stations <- transit_clean_re %>%
   filter(Route == "A") %>%
   distinct(Line, Station.Name) %>%
   nrow()
+The_A_train_stations
+
 
 add_compliant_A <- transit_clean_re %>%
   filter(Route == "A",ADA == "TRUE") %>%
@@ -79,9 +82,155 @@ add_compliant_A <- transit_clean_re %>%
   nrow()
 
 add_compliant_A
-mlb11_df = read_excel("data/mlb11.xlsx", n_max = 20)
+cat('There are',The_A_train_stations, 'distinct stations serve the A train. Of the stations that serve the A train, there are', add_compliant_A, 'ADA compliant.')
 ```
 
+#Problem2
+```{r}
+library(readxl)
+library(dplyr)
+file_path <- "202409 Trash Wheel Collection Data.xlsx"
+mr_trash_wheel <- read_excel(file_path, sheet = "Mr. Trash Wheel", skip = 1)
+colnames(mr_trash_wheel)
 
+# Renaming columns based on actual column names
+mr_trash_wheel <- mr_trash_wheel %>%
+  rename(Dumpster = 1, Month = 2, Year = 3, Date = 4, Weight_tons = 5, 
+         Volume_cubic_yards = 6, Plastic_Bottles = 7, Polystyrene = 8, 
+         Cigarette_Butts = 9, Glass_Bottles = 10, Plastic_Bags = 11, 
+         Wrappers = 12, Sports_Balls = 13) %>%
+  filter(!is.na(Dumpster)) %>%
+  mutate(Sports_Balls = as.integer(round(Sports_Balls)),
+         Trash_Wheel = "Mr. Trash Wheel")%>%
+  mutate(Year = as.character(Year))
+mr_trash_wheel
+
+```
+#Problem2 prof_trash
+```{r}
+prof_trash_wheel <- read_excel(file_path, sheet = "Professor Trash Wheel", skip = 1)
+colnames(prof_trash_wheel)
+
+prof_trash_wheel <- prof_trash_wheel %>%
+  rename(Dumpster = 1, Month = 2, Year = 3, Date = 4, Weight_tons = 5, 
+         Volume_cubic_yards = 6, Plastic_Bottles = 7, Polystyrene = 8, 
+         Cigarette_Butts = 9, Glass_Bottles = 10, Plastic_Bags = 11, 
+         Wrappers = 12) %>%
+  filter(!is.na(Dumpster)) %>%
+  mutate(Sports_Balls = 0, Trash_Wheel = "Professor Trash Wheel")%>%
+  mutate(Year = as.character(Year))
+prof_trash_wheel
+```
+
+#Problem2 Gwynnda_trash
+```{r}
+# Read and clean Gwynnda Trash Wheel data
+gwynnda_trash_wheel <- read_excel(file_path, sheet = "Gwynnda Trash Wheel", skip = 1)
+colnames(gwynnda_trash_wheel)
+
+# Renaming columns based on actual column names
+gwynnda_trash_wheel <- gwynnda_trash_wheel %>%
+  rename(Dumpster = 1, Month = 2, Year = 3, Date = 4, Weight_tons = 5, 
+         Volume_cubic_yards = 6, Plastic_Bottles = 7, Polystyrene = 8, 
+         Cigarette_Butts = 9, Plastic_Bags = 10, Wrappers = 11) %>%
+  filter(!is.na(Dumpster)) %>%
+  mutate(Sports_Balls = 0, Trash_Wheel = "Gwynnda Trash Wheel")%>%
+  mutate(Year = as.character(Year))
+gwynnda_trash_wheel
+```
+# Combine the datasets
+```{r}
+# Combine the datasets
+combined_trash_wheel_data <- bind_rows(mr_trash_wheel, prof_trash_wheel, gwynnda_trash_wheel)
+
+# Total weight of trash collected by Professor Trash Wheel
+total_weight_prof_trash <- combined_trash_wheel_data %>%
+  filter(Trash_Wheel == "Professor Trash Wheel") %>%
+  summarise(total_weight = sum(Weight_tons, na.rm = TRUE)) %>%
+  pull(total_weight)
+
+# Total number of cigarette butts collected by Gwynnda in June 2022
+gwynnda_june_2022 <- combined_trash_wheel_data %>%
+  filter(Trash_Wheel == "Gwynnda Trash Wheel", Month == "June", Year == 2022) %>%
+  summarise(total_butts = sum(Cigarette_Butts, na.rm = TRUE)) %>%
+  pull(total_butts)
+
+cat("Total weight of trash collected by Professor Trash Wheel: ", total_weight_prof_trash, " tons\n")
+cat("Total number of cigarette butts collected by Gwynnda in June 2022: ", gwynnda_june_2022, "\n")
+```
+#data set
+The combined_trash_wheel_data dataset is a comprehensive datasets from Mr. Garbage Truck, Professor Garbage Truck, and Gwynnda Garbage Truck provide a comprehensive view of the garbage collection efforts of these facilities. The dataset contains key variables such as garbage can number, month and year of collection, total weight of waste collected in tons, volume in cubic yards, and counts of various types of waste such as plastic bottles, polystyrene, cigarette butts, glass bottles, plastic bags, wrapping paper, and sports balls.
+
+#Problem3
+```{r}
+bakers <- read.csv("gbb_datasets/bakers.csv")
+bakes <- read.csv("gbb_datasets/bakes.csv")
+results <- read.csv("gbb_datasets/results.csv", skip = 2)
+viewers <- read.csv("gbb_datasets/viewers.csv")
+```
+
+```{r}
+colnames(results)
+results_clean <- results %>%
+  rename(Episode = episode, Series = series, Baker_Name = baker, Result = result)
+bakes <- bakes %>%
+  mutate(Baker = str_replace_all(Baker, '"', ''))%>%
+  rename(Baker_Name = Baker)
+bakers <- bakers %>%
+  rename(Baker_Name = 'Baker.Name')%>%
+  mutate(Baker_Name = word(Baker_Name, 1))
+missing_bakers <- anti_join(bakes, bakers, by = c('Series', 'Baker_Name'))
+
+```
+```{r}
+bake_data <- left_join(bakes, bakers, by = c("Baker_Name", "Series"))
+
+# Merge bake_data with results_clean on Episode and Baker_Name
+final_data <- left_join(bake_data, results_clean, by = c("Baker_Name", "Series","Episode"))
+```
+```{r}
+# Save the final dataset as a CSV file
+write_csv(final_data, "gbb_datasets/final_gbbo_data.csv")
+```
+#Describe data cleaning process
+I read the data first. However, I forgot to skip 2 rows in results.csv which made me cannot do the next steps. Then I rename the cols in different files to merge these files to form a dataset that I named final_data. At first, I used anti_join function to check whether my data are complete and correct. But I found out there's a baker named 'jo' is missing. Then I checked the files by myself, and find out there's a Jo in bakers, and there's a 'Jo' in bakes.Then I used mutate to remove the '' symbol and finally I got the right answer. I also found that the name of baker in bakers file and bakes file are different, which cause the missing value in my final_data set. And I use mutate function again to solve the problem. When I think everything have been done well, I found that I forgot to add "Episode" as a requirement when I used lef_join to form the final_data set. Fortunatlely, I found the problem out and get the right result.
+The final_data show us all the baker have attended the Great British Bake Off.We can use the final_data dataset to find the baker by Epsiode,Series,hometown,signature bake,etc. It's useful and comprehensive.
+
+
+
+```{r}
+star_bakers <- final_data %>%
+  filter(Series >= 5 & Series <= 10, Result %in% c("STAR BAKER", "WINNER")) %>%
+  select(Series, Episode, Baker_Name,Result)
+
+# Display the table of Star Bakers
+star_bakers_table <- star_bakers %>%
+  arrange(Series, Episode)
+```
+#Comment on this table – were there any predictable overall winners? Any surprises?
+According to the table I got, we cannot predict overall winners by the "Star baker". For example, Richard have got 5 times Star baker reward, but the final winner is Nancy. The result is counterintuitive and surprising.
+
+```{r}
+# Convert viewers.csv into a tidy format using pivot_longer
+viewers_tidy <- viewers %>%
+  pivot_longer(cols = starts_with("Series"), names_to = "Series", values_to = "Viewership")
+
+# Convert 'Series' column to numeric
+viewers_tidy <- viewers_tidy %>%
+  mutate(Series = as.numeric(str_replace(Series, "Series.", "")))
+# Calculate average viewership for Season 1 and Season 5
+avg_viewership_s1 <- viewers_tidy %>%
+  filter(Series == 1) %>%
+  summarize(avg_viewership = mean(Viewership,na.rm = TRUE))
+
+avg_viewership_s5 <- viewers_tidy %>%
+  filter(Series == 5) %>%
+  summarize(avg_viewership = mean(Viewership,na.rm = TRUE))
+head(viewers_tidy,10)
+cat("The average viewership in Season 1:",avg_viewership_s1$avg_viewership,"\n")
+cat("The average viewership in Season 5:",avg_viewership_s5$avg_viewership,"\n")
+
+
+```
 
 
